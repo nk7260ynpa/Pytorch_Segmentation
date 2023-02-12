@@ -26,7 +26,13 @@ def main(opt):
     logging.basicConfig(level=logging.DEBUG, filename=log_path, filemode='w', format="")
     weights_name = datetime.datetime.strftime(datetime.datetime.now(), "%m%d%H%M") + ".pth"
     save_path = os.path.join("weights", weights_name)
-    device = torch.device("cuda" if torch.cuda.is_available else "cpu")
+    
+    if ('Darwin' in os.uname()) and ("arm64" in os.uname()):
+        device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
 
     Train_dataset = utils.VOC_dataset(VOC_DIR)
     Valid_dataset = utils.VOC_dataset(VOC_DIR, train=False)
@@ -61,9 +67,12 @@ def main(opt):
             _, preds = torch.max(outputs, 1)
             loss = loss_fun(outputs, labels).sum()
             loss.backward()
+            print(loss)
             optimizer.step()
             train_loss += loss.item()
             sample_num += labels.shape[0]
+            print(loss)
+        assert False
 
         train_loss = train_loss / sample_num
         print(f'train Loss: {train_loss:.4f}')
