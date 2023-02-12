@@ -67,12 +67,9 @@ def main(opt):
             _, preds = torch.max(outputs, 1)
             loss = loss_fun(outputs, labels).sum()
             loss.backward()
-            print(loss)
             optimizer.step()
             train_loss += loss.item()
             sample_num += labels.shape[0]
-            print(loss)
-        assert False
 
         train_loss = train_loss / sample_num
         print(f'train Loss: {train_loss:.4f}')
