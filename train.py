@@ -13,6 +13,7 @@ import utils
 import logging
 import argparse
 
+
 def main(opt):
     VOC_DIR = opt.data_folder
     BATCH_SIZE = opt.batch_size
@@ -20,6 +21,7 @@ def main(opt):
     NUM_EPOCHS = opt.epochs
     Learning_Rate = opt.lr
     Weight_Decay = opt.Weight_decay
+    NUM_WORKERS = opt.num_workers
     
     log_name = datetime.datetime.strftime(datetime.datetime.now(), "%m%d%H%M") + ".log"
     log_path = os.path.join("logs", log_name)
@@ -38,9 +40,9 @@ def main(opt):
     Valid_dataset = utils.VOC_dataset(VOC_DIR, train=False)
 
     Train_loader = torch.utils.data.DataLoader(Train_dataset, BATCH_SIZE, shuffle=True, 
-                                               drop_last=True, num_workers=4)
+                                               drop_last=True, num_workers=NUM_WORKERS)
     Valid_loader = torch.utils.data.DataLoader(Valid_dataset, BATCH_SIZE, shuffle=False, 
-                                               drop_last=True, num_workers=4)
+                                               drop_last=True, num_workers=NUM_WORKERS)
 
     model = utils.ResNet18_FCN(NUM_CLASSES)
 
@@ -58,7 +60,7 @@ def main(opt):
 
         model.train()
         train_loss = 0.0
-        sample_num = 0.0
+        sample_num = 0.0 + 1
         for inputs, labels in Train_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -77,7 +79,7 @@ def main(opt):
 
         model.eval()
         valid_loss = 0.0
-        sample_num = 0.0
+        sample_num = 0.0 + 1
         for inputs, labels in Valid_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -107,6 +109,7 @@ if __name__ == '__main__':
     parser.add_argument('--saved_model', default='', help="epochs")
     parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
     parser.add_argument('--Weight_decay', type=float, default=1e-3, help='weight decay')
+    parser.add_argument('--num_workers', type=int, default=0, help='num of workers')
     
     opt = parser.parse_args()
     main(opt)
